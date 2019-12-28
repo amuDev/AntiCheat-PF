@@ -272,7 +272,7 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 
   // i think i did maths wrong here?
   //TODO
-  if((FloatAbs(fDeltaAngleAbs - g_fPreviousOptimizedAngle) <= (g_fPreviousOptimizedAngle[client] / 128.0) && fSpeed < 2560.0) {
+  if((FloatAbs(fDeltaAngleAbs - g_fPreviousOptimizedAngle[client]) <= (g_fPreviousOptimizedAngle[client] / 128.0) && fSpeed < 2560.0) {
     if(++g_iPerfAngleStreak[client] == 10)
       AC_Trigger(client, T_LOW, DESC3, "fuck");
     else if(g_iPerfAngleStreak[client] == 30)
