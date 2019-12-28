@@ -6,21 +6,39 @@
 
 #define DESC1 "Too many perfect strafe"
 #define DESC2 "Average strafe too close to 0"
-#define DESC3 "Acute TR formatter"
+#define DESC3 "Perfect Turn Rate"
 //#define DESC4 ""
 
 #define SAMPLE_SIZE 35
 
 char g_szLogPath[PLATFORM_MAX_PATH];
 
+int g_iAbsTicks[MAXPLAYERS+1]
+  , g_iCurrentStrafe[MAXPLAYERS+1]
+  , g_iPerfAngleStreak[MAXPLAYERS+1]
+  , g_iPreviousButtons[MAXPLAYERS+1]
+  , g_iKeyTransitionTick[MAXPLAYERS+1]
+  , g_iAngleTransitionTick[MAXPLAYERS+1]
+  , g_iBashTriggerCountdown[MAXPLAYERS+1];
 
+float g_fPreviousAngle[MAXPLAYERS+1]
+    , g_fPreviousDeltaAngle[MAXPLAYERS+1]
+    , g_fPreviousDeltaAngleAbs[MAXPLAYERS+1]
+    , g_fPreviousOptimizedAngle[MAXPLAYERS+1];
 
-public Plugin myinf = {
-  name = "",
-  author = "",
-  description = "",
-  version = "",
-  url = ""
+bool g_bKeyChanged[MAXPLAYERS+1]
+   , g_bLeftThisJump[MAXPLAYERS+1]
+   , g_bRightThisJump[MAXPLAYERS+1]
+   , g_bDirectionChanged[MAXPLAYERS+1];
+
+ArrayList g_aStrafeHistory[MAXPLAYERS+1]
+
+public Plugin myinfo = {
+  name = "AC Strafe module",
+  author = "hiiamu",
+  description = "strafe mwoduel for AC",
+  version = "0.1.0",
+  url = "/id/hiiamu"
 }
 
 public void OnPluginStart() {
@@ -35,7 +53,18 @@ public void OnPluginStart() {
 }
 
 public void OnClientPutInServer(int client) {
-  
+  g_iAbsTicks[client] = 0;
+  g_iCurrentStrafe[client] = 0;
+  g_iPerfAngleStreak[client] = 0;
+  g_iPreviousButtons[client] = 0;
+  g_iKeyTransitionTick[client] = 0;
+  g_iAngleTransitionTick[client] = 0;
+  g_iBashTriggerCountdown[client] = 0;
+
+  g_bKeyChanged[client] = false;
+  g_bDirectionChanged[client] = false;
+
+  g_aStrafeHistory[client] = new ArrayList();
 }
 
 public void OnClientDisconnect(int client) {
@@ -90,7 +119,7 @@ int GetSamples(int client) {
 }
 
 public Action Client_PrintStrafeStats(int client, int args) {
-  if(rags < 1) {
+  if(args < 1) {
     ReplyToCommand(client, "Proper Formatting: sm_strafes <target>");
     return Plugin_Handled;
   }
@@ -140,7 +169,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 }
 
 Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
-  float fDeltaAngle = angles[1] - g_f1PreviousAngle[client];
+  float fDeltaAngle = angles[1] - g_fPreviousAngle[client];
 	g_fPreviousAngle[client] = angles[1];
 
   if(!IsMoveTypeLeagl(client))
@@ -163,6 +192,8 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
   if((iFlags & (FL_ONGROUND | FL_INWATER)) == 0) {
     if((buttons & (IN_MOVELEFT | IN_MOVERIGHT)) != (IN_MOVELEFT | IN_MOVERIGHT) &&
        (buttons & (IN_FORWARD | IN_BACK)) != (IN_FORWARD | IN_BACK)) {
+      // True sync calculations...
+      // not that KZTimer %sync shit
       if(
           // Buttons switch from A to D 
           // Or D to A
@@ -183,10 +214,12 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 
     if(!g_bDirectionChanged[client] &&
         (fDeltaAngleAbs != 0.0 &&
-         ((fDeltaAngle < 0.0 && g_fPreviousDeltaAngle[client] > 0.0) ||
+        ((fDeltaAngle < 0.0 && g_fPreviousDeltaAngle[client] > 0.0) ||
         (fDeltaAngle > 0.0 && g_fPreviousDeltaAngle[client] < 0.0) ||
         g_fPreviousDeltaAngleAbs[client] == 0.0))) {
       // i dont like maths in sp
+
+      //g_bDirectionChanged means mouse changed....
       g_bDirectionChanged[client] = true;
       g_iAngleTransitionTick[client] = g_iAbsTicks[client];
     }
@@ -199,6 +232,8 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 
       int iTick = g_iKeyTransitionTick[client] - g_iAngleTransitionTick[client];
 
+      // Only update array if they are actually syncing their
+      // keys and mouse movement
       if(-25 <= iTick <= 25) {
         g_aStrafeHistory[client].Push(iTick);
         g_iCurrentStrafe[client]++;
