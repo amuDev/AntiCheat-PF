@@ -17,7 +17,7 @@ enum {
  *                      Plugin_Handled to not call post hook AC_Trigger.
  *                      Plugin_Stop to ignore trigger fully.
  */
-forward Action AC_Triggered(int client, int &level, char[] cheatDesc);
+//forward Action AC_Triggered(int client, int &level, char[] cheatDesc);
 
 /**
  * Post hook for detections
@@ -83,7 +83,7 @@ public SharedPlugin __pl_ac = {
 
 if !defined REQUIRE_PLUGIN
 public void __pl_ac_SetNTVOptional() {
-  MarkNativeAsOptional("AC_Triggered");
+  //MarkNativeAsOptional("AC_Triggered");
   MarkNativeAsOptional("AC_Trigger");
   MarkNativeAsOptional("AC_NotifyAdmins");
   MarkNativeAsOptional("AC_LogToServer");
