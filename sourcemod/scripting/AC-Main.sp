@@ -75,8 +75,10 @@ public int Native_Trigger(Handle plugin, int numParams) {
 
   char[] szLevel = new char[16];
   char[] szCheatDesc = new char[32];
+  char[] szCheatInfo = new char[300];
 
   GetNativeString(3, szCheatDesc, 32);
+  GetNativeString(4, szCheatInfo, 512);
 
   if(level == T_LOW) {
     strcopy(szLevel, 16, "LOW");
