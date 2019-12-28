@@ -18,12 +18,8 @@ public Plugin myinfo = {
   url = "/id/hiiamu/, /id/zwolof/, /id/powerind/"
 }
 
-//TODO
-/**
- * Maybe dont use Triggered and just use Trigger?
- */
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
-  //CreateNative("AC_Triggered", Native_Triggered);
+  //CreateNative("AC_Triggered", Native_Triggered); removed unless i need it...
   CreateNative("AC_Trigger", Native_Trigger);
   CreateNative("AC_NotifyAdmins", Native_NotifyAdmins);
   CreateNative("AC_LogToServer", Native_LogToServer);
@@ -91,12 +87,12 @@ public int Native_Trigger(Handle plugin, int numParams) {
   }
   else if(level == T_HIGH) {
     strcopy(szLevel, 16, "HIGH");
-    if(!g_bTesting[client])
+    if(!AC_IsTesting(client))
       KickClient(client, "[AC] %s", szCheatDesc);
   }
   else if(level == T_DEF) {
     strcopy(szLevel, 16, "DEF");
-    if(!g_bTesting[client])
+    if(!AC_IsTesting(client))
       KickClient(client, "[AC] %s", szCheatDesc);
   }
 
@@ -104,11 +100,15 @@ public int Native_Trigger(Handle plugin, int numParams) {
   GetClientAuthId(client, AuthId_Steam3, szAuth, 32);
 
   char[] szBuffer = new char[128];
-  Format(szBuffer, 128, "\x03%N\x01 - \x05%s\x01 Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel);
+  if(!AC_IsTesting(client)) {
+    Format(szBuffer, 128, "\x03%N\x01 - \x05%s\x01 Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel);
+    LogFileEx(g_szLogPath, "%L - %s Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel);
+    //TODO Notify discord
+  }
+  else
+    Format(szBuffer, 128, "\x03%N\x01 - TEST \x05%s\x01 Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel)
 
   AC_NotifyAdmins("%s", szBuffer);
-  LogFileEx(g_szLogPath, "%L - %s Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel);
-
   return;
 }
 
