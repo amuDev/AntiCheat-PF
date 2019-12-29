@@ -103,12 +103,12 @@ public int Native_Trigger(Handle plugin, int numParams) {
 
   char[] szBuffer = new char[128];
   if(!AC_IsTesting(client)) {
-    Format(szBuffer, 128, "\x03%N\x01 - \x05%s\x01 Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel);
-    LogFileEx(g_szLogPath, "%L - %s Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel);
+    Format(szBuffer, 128, "\x03%N\x01 - \x05%s\x01 Cheat: %s | Level: %s", client, szAuth, szCheatDesc, szLevel);
+    LogToFileEx(g_szLogPath, "%L - %s Cheat: %s | Level: %s", client, szAuth, szCheatDesc, szLevel);
     //TODO Notify discord
   }
   else
-    Format(szBuffer, 128, "\x03%N\x01 - TEST \x05%s\x01 Cheat: %s | Level: %s", client, szAuth, szCheatDescription, szLevel)
+    Format(szBuffer, 128, "\x03%N\x01 - TEST \x05%s\x01 Cheat: %s | Level: %s", client, szAuth, szCheatDesc, szLevel);
 
   AC_NotifyAdmins("%s", szBuffer);
   return;
@@ -140,7 +140,7 @@ public int Native_LogToServer(Handle plugin, int numParams) {
 
   static int iWritten = 0;
 
-  char[] szBuffer, new char[300];
+  char[] szBuffer = new char[300];
   FormatNativeString(0, 1, 2, 300, iWritten, szBuffer);
-  LogFileEx(g_szLogPath, "[%s] %s", szPlugin, szBuffer);
+  LogToFileEx(g_szLogPath, "[%s] %s", szPlugin, szBuffer);
 }
