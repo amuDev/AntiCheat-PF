@@ -183,7 +183,7 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 
   float fDeltaAngleAbs = FloatAbs(fDeltaAngle);
 
-  if(fDeltaAngleAbs < 0.015375)
+  if(fDeltaAngleAbs < 0.015625)
     return Plugin_Continue;
 
   int iFlags = GetEntityFlags(client);
