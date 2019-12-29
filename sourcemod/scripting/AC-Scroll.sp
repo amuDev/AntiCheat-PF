@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <sdktools>
 #include <AC-Helper>
 
 #pragma newdecls required
@@ -11,7 +12,7 @@
 #define DESC5 "Scripted jumps (patt4)" // 75%+ pos, inhumanly consistent sp
 #define DESC6 "Scripted jumps (patt5)" // 70%+ pos, obvously random sp
 #define DESC7 "Scripted jumps (patt6)" // 40%+ pos, no sp before touching ground
-#define DESC8 "Scripted jumps (patt7)" // 40%+ pos, no sp after touching ground 
+#define DESC8 "Scripted jumps (patt7)" // 40%+ pos, no sp after touching ground
 #define DESC9 "Scripted jumps (patt8)" // 50%+ pos, same sp before and after touching ground
 #define DESC10 "Scroll macro (patt0)" // sp 19+ (hyper scroll or similar)
 #define DESC11 "Scroll cheat (patt0)" // ticks between scrolls is perfect
@@ -32,26 +33,25 @@
 ConVar g_svAutoBhop = null;
 
 bool g_bAutoBhop = false
-   , g_bPreviousGround[MAXPLAYERS+1] = {true, ...};
+	 , g_bPreviousGround[MAXPLAYERS+1] = {true, ...};
 
 int g_iSampleSize = 45
-  , g_iGroundTicks[MAXPLAYERS+1]
-  , g_iReleaseTick[MAXPLAYERS+1]
-  , g_iAirTicks[MAXPLAYERS+1]
-  , g_iPreviousButtons[MAXPLAYERS+1]
-  , g_iCurrentJump[MAXPLAYERS+1];
+	, g_iGroundTicks[MAXPLAYERS+1]
+	, g_iReleaseTick[MAXPLAYERS+1]
+	, g_iAirTicks[MAXPLAYERS+1]
+	, g_iPreviousButtons[MAXPLAYERS+1]
+	, g_iCurrentJump[MAXPLAYERS+1];
 
 char g_szLogPath[PLATFORM_MAX_PATH];
 
 ArrayList g_aJumpStats[MAXPLAYERS+1];
-any g_aStatsArray[MAXPLAYERS+1][STATSARRAY_SIZE];
 
 public Plugin myinfo = {
-  name = "",
-  author = "",
-  description = "",
-  version = "",
-  url = ""
+	name = "",
+	author = "",
+	description = "",
+	version = "",
+	url = ""
 }
 
 // enums for jummping checks
@@ -72,124 +72,126 @@ enum {
 	State_Releasing
 }
 
+any g_aStatsArray[MAXPLAYERS+1][STATSARRAY_SIZE];
+
 public void OnPluginStart() {
-  g_svAutoBhop = FindConVar("sv_autobunnyhopping");
+	g_svAutoBhop = FindConVar("sv_autobunnyhopping");
 
-  if(g_svAutoBhop != null)
-    g_svAutoBhop.AddChangeHook(OnAutoBhopChanged);
+	if(g_svAutoBhop != null)
+		g_svAutoBhop.AddChangeHook(OnAutoBhopChanged);
 
-  for(int i = 1; i <= MaxClients; i++) {
-    if(IsClientInGame(i))
-      OnClientPutInServer(i);
-  }
-  RegConsoleCmd("sm_scrolls", Client_PrintScrollStats, "Prints scroll stats for given player.");
+	for(int i = 1; i <= MaxClients; i++) {
+		if(IsClientInGame(i))
+			OnClientPutInServer(i);
+	}
+	RegConsoleCmd("sm_scrolls", Client_PrintScrollStats, "Prints scroll stats for given player.");
 
-  BuildPath(Path_SM, g_szLogPath, PLATFORM_MAX_PATH, "logs/AC-Scrolls.log");
+	BuildPath(Path_SM, g_szLogPath, PLATFORM_MAX_PATH, "logs/AC-Scrolls.log");
 }
 
 public void OnMapStart() {
-  g_iSampleSize = GetRandomInt(SAMPLE_SIZE_MIN, SAMPLE_SIZE_MAX);
+	g_iSampleSize = GetRandomInt(SAMPLE_SIZE_MIN, SAMPLE_SIZE_MAX);
 }
 
 public void OnClientPutInServer(int client) {
-  g_aJumpStats[client] = new ArrayList(STATSARRAY_SIZE);
-  g_iCurrentJump[client] = 0;
-  ResetScrollStats(client);
+	g_aJumpStats[client] = new ArrayList(STATSARRAY_SIZE);
+	g_iCurrentJump[client] = 0;
+	ResetScrollStats(client);
 }
 
 public void OnClientDisconnect(int client) {
-  delete g_aJumpStats[client];
+	delete g_aJumpStats[client];
 }
 
 public void OnAutoBhopChanged(ConVar convar, const char[] oldValue, const char[] newValue) {
-  g_bAutoBhop = view_as<bool>(StringToInt(newValue));
+	g_bAutoBhop = view_as<bool>(StringToInt(newValue));
 }
 
 public void OnConfigsExecuted() {
-  if(g_svAutoBhop != null)
-    g_bAutoBhop = g_svAutoBhop.BoolValue;
+	if(g_svAutoBhop != null)
+		g_bAutoBhop = g_svAutoBhop.BoolValue;
 }
 
 public Action Client_PrintScrollStats(int client, int args) {
-  if(args < 1) {
-    ReplyToCommand(client, "Proper Formatting: sm_scrolls <target>");
-    return Plugin_Handled;
-  }
+	if(args < 1) {
+		ReplyToCommand(client, "Proper Formatting: sm_scrolls <target>");
+		return Plugin_Handled;
+	}
 
-  char[] szArgs = new char[MAX_TARGET_LENGTH];
-  GetCmdArgString(szArgs, MAX_TARGET_LENGTH);
+	char[] szArgs = new char[MAX_TARGET_LENGTH];
+	GetCmdArgString(szArgs, MAX_TARGET_LENGTH);
 
-  int iTarget = FindTarget(client, szArgs);
+	int target = FindTarget(client, szArgs);
 
-  if(target == -1)
-    return Plugin_Handled;
+	if(target == -1)
+		return Plugin_Handled;
 
-  if(GetSamples(target) == 0) {
-    ReplyToCommand(client, "%N does not have any scroll stats.", target);
-    return Plugin_Handled;
-  }
+	if(GetSamples(target) == 0) {
+		ReplyToCommand(client, "%N does not have any scroll stats.", target);
+		return Plugin_Handled;
+	}
 
-  char[] szScrollStats = new char[300];
-  FormatScrolls(target, szScrollStats, 300);
+	char[] szScrollStats = new char[300];
+	FormatScrolls(target, szScrollStats, 300);
 
-  ReplyToCommand(client, "Scrolls for %N: %s", target, szScrollStats);
+	ReplyToCommand(client, "Scrolls for %N: %s", target, szScrollStats);
 
-  return Plugin_Handled;
+	return Plugin_Handled;
 }
 
 void FormatScrolls(int client, char[] buffer, int maxlength) {
-  FormatEx(buffer, maxlength, "%i%% perfs, %i samples: {", GetPerfs(client), GetSamples(client));
+	FormatEx(buffer, maxlength, "%i%% perfs, %i samples: {", GetPerfs(client), GetSamples(client));
 
-  int iSize = g_aJumpStats[client].Length;
-  int iEnd = (iSize >= g_iSampleSize) ? (iSize - g_iSampleSize):0;
+	int iSize = g_aJumpStats[client].Length;
+	int iEnd = (iSize >= g_iSampleSize) ? (iSize - g_iSampleSize):0;
 
-  for(int i = iSize - 1; i >= iEnd; i--) {
-    //TODO different format for a perf jump rather than no perf
-    Format(buffer, maxlength, "%s %i", buffer, g_aJumpStats[client].Get(i, StatsArray_Scrolls));
-  }
+	for(int i = iSize - 1; i >= iEnd; i--) {
+		//TODO different format for a perf jump rather than no perf
+		Format(buffer, maxlength, "%s %i", buffer, g_aJumpStats[client].Get(i, StatsArray_Scrolls));
+	}
 
-  int iPos = strlen(buffer) - 1;
+	int iPos = strlen(buffer) - 1;
 
-  if(buffer[iPos] == ',')
-    buffer[iPos] = ' ';
+	if(buffer[iPos] == ',')
+		buffer[iPos] = ' ';
 
-  StrCat(buffer, maxlength, "}");
+	StrCat(buffer, maxlength, "}");
 }
 
 int GetSamples(int client) {
-  if(g_aJumpStats[client] == null)
-    return 0;
+	if(g_aJumpStats[client] == null)
+		return 0;
 
-  int iSize = g_aJumpStats[client].Length;
-  int iEnd = (iSize >= g_iSampleSize) ? (iSize - g_iSampleSize):0;
+	int iSize = g_aJumpStats[client].Length;
+	int iEnd = (iSize >= g_iSampleSize) ? (iSize - g_iSampleSize):0;
 
-  return (iSize - iEnd);
+	return (iSize - iEnd);
 }
 
 int GetPerfs(int client) {
-  int iPerfs = 0;
-  int iSize = g_aJumpStats[client].Length;
-  int iEnd = (iSize >= g_iSampleSize) ? (iSize - g_iSampleSize):0;
-  int iJumpCount = (iSize - iEnd);
+	int iPerfs = 0;
+	int iSize = g_aJumpStats[client].Length;
+	int iEnd = (iSize >= g_iSampleSize) ? (iSize - g_iSampleSize):0;
+	int iJumpCount = (iSize - iEnd);
 
-  for(int i = iSize - 1; i >= i End; i--) {
-    if(view_as<bool>(g_aJumpStats[client].Get(i, StatsArray_PerfectJump)))
-      iPerfs++;
-  }
+	for(int i = iSize - 1; i >= iEnd; i--) {
+		if(view_as<bool>(g_aJumpStats[client].Get(i, StatsArray_PerfectJump)))
+			iPerfs++;
+	}
 
-  if(iJumpCount == 0)
-    return 0;
+	if(iJumpCount == 0)
+		return 0;
 
-  return RoundToZero((float(iPerfs) / iTotalJumps) * 100);
+	return RoundToZero((float(iPerfs) / iJumpCount) * 100);
 }
 
 void ResetScrollStats(int client) {
-  for(int i = 0; i < STATSARRAY_SIZE; i++) {
-    g_aStatsArray[client][i] = 0;
-  }
+	for(int i = 0; i < STATSARRAY_SIZE; i++) {
+		g_aStatsArray[client][i] = 0;
+	}
 
-  g_iReleaseTick[client] = GetGameTickCount();
-  g_iAirTicks[client] = 0;
+	g_iReleaseTick[client] = GetGameTickCount();
+	g_iAirTicks[client] = 0;
 }
 
 public bool TRFilter_NoPlayers(int entity, int mask, any data) {
@@ -204,7 +206,6 @@ float GetGroundDistance(int client) {
 	float fPosition[3];
 	GetClientAbsOrigin(client, fPosition);
 	TR_TraceRayFilter(fPosition, view_as<float>({90.0, 0.0, 0.0}), MASK_PLAYERSOLID, RayType_Infinite, TRFilter_NoPlayers, client);
-
 	float fGroundPosition[3];
 
 	if(TR_DidHit() && TR_GetEndPosition(fGroundPosition)) {
@@ -215,227 +216,228 @@ float GetGroundDistance(int client) {
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons) {
-  if(!IsValidClient(client))
-    return Plugin_Continue;
-  return SetupMove(client, buttons);
+	if(!IsValidClient(client))
+		return Plugin_Continue;
+	return SetupMove(client, buttons);
 }
 
 Action SetupMove(int client, int buttons) {
-  if(g_bAutoBhop)
-    return Plugin_Changed;
+	if(g_bAutoBhop)
+		return Plugin_Changed;
 
-  bool bTouchingGround = ((GetEntityFlags(client) & FL_ONGROUND) > 0 || GetEntProp(client, Prop_Send, "m_nWaterLevel") >= 2);
+	bool bTouchingGround = ((GetEntityFlags(client) & FL_ONGROUND) > 0 || GetEntProp(client, Prop_Send, "m_nWaterLevel") >= 2);
 
-  if(bTouchingGround)
-    g_iGroundTicks[client]++;
+	if(bTouchingGround)
+		g_iGroundTicks[client]++;
 
-  float fAbsVelocity[3];
+	float fAbsVelocity[3];
 	GetEntPropVector(client, Prop_Data, "m_vecAbsVelocity", fAbsVelocity);
 
 	float fSpeed = (SquareRoot(Pow(fAbsVelocity[0], 2.0) + Pow(fAbsVelocity[1], 2.0)));
 
-  if(fSpeed > 240.0 && IsMoveTypeLeagl(client, false))
-    CollectScrollStats(client, bTouchingGround, buttons, fAbsVelocity[2]);
+	if(fSpeed > 240.0 && IsMoveTypeLeagl(client, false))
+		CollectScrollStats(client, bTouchingGround, buttons, fAbsVelocity[2]);
 
-  else
-    ResetScrollStats(client);
+	else
+		ResetScrollStats(client);
 
-  g_bPreviousGround[client] = bTouchingGround;
-  g_iPreviousButtons[client] = buttons;
+	g_bPreviousGround[client] = bTouchingGround;
+	g_iPreviousButtons[client] = buttons;
 
-  return Plugin_Continue;
+	return Plugin_Continue;
 }
 
 void CollectScrollStats(int client, bool bTouchingGround, int buttons, float fAbsVelocityZ) {
-  int iGroundState = State_Nothing;
-  int iButtonState = State_Nothing;
+	int iGroundState = State_Nothing;
+	int iButtonState = State_Nothing;
 
-  if(bTouchingGround && !g_bPreviousGround[client])
-    iGroundState = State_Landing;
+	if(bTouchingGround && !g_bPreviousGround[client])
+		iGroundState = State_Landing;
 
-  else if(!bTouchingGround && g_bPreviousGround[client])
-    iGroundState = State_Jumping;
+	else if(!bTouchingGround && g_bPreviousGround[client])
+		iGroundState = State_Jumping;
 
-  if((buttons & IN_JUMP) > 0 && (g_iPreviousButtons[client] & IN_JUMP) == 0)
-    iButtonState = State_Pressing;
+	if((buttons & IN_JUMP) > 0 && (g_iPreviousButtons[client] & IN_JUMP) == 0)
+		iButtonState = State_Pressing;
 
-  else if((buttons & IN_JUMP) == 0 && (g_iPreviousButtons[client] & IN_JUMP) > 0)
-    iButtonState = State_Releasing;
+	else if((buttons & IN_JUMP) == 0 && (g_iPreviousButtons[client] & IN_JUMP) > 0)
+		iButtonState = State_Releasing;
 
-  int iTicks = GetGameTickCount();
+	int iTicks = GetGameTickCount();
 
-  if(iButtonState == State_Pressing) {
-    g_aStatsArray[client][StatsArray_Scrolls]++;
-    g_aStatsArray[client][StatsArray_AverageTicks] += (iTicks - g_iReleaseTick[client]);
+	if(iButtonState == State_Pressing) {
+		g_aStatsArray[client][StatsArray_Scrolls]++;
+		g_aStatsArray[client][StatsArray_AverageTicks] += (iTicks - g_iReleaseTick[client]);
 
-    if(bTouchingGround) {
-      if((buttons & IN_JUMP) > 0)
-        g_aStatsArray[client][StatsArray_PerfectJump] = !g_bPreviousGround[client];
-    }
+		if(bTouchingGround) {
+			if((buttons & IN_JUMP) > 0)
+				g_aStatsArray[client][StatsArray_PerfectJump] = !g_bPreviousGround[client];
+		}
 
-    else {
-      float fDistance = GetGroundDistance(client);
+		else {
+			float fDistance = GetGroundDistance(client);
 
-      if(fDistance < 33.0) {
-        if(fAbsVelocityZ > 0.0 && g_iCurrentJump[client] > 1) {
-          // updating previous jump with StatsArray_AfterGround data.
-          int iJump = (g_iCurrentJump[client] - 1);
-          int iAfter = g_aJumpStats[client].Get(iJump, StatsArray_AfterGround);  
-          g_aJumpStats[client].Set(iJump, iAfter + 1, StatsArray_AfterGround);
-        }
-        else if(fAbsVelocityZ < 0.0)
-          g_aStatsArray[client][StatsArray_BeforeGround]++;
-      }
-    }
-  }
+			if(fDistance < 33.0) {
+				if(fAbsVelocityZ > 0.0 && g_iCurrentJump[client] > 1) {
+					// updating previous jump with StatsArray_AfterGround data.
+					int iJump = (g_iCurrentJump[client] - 1);
+					int iAfter = g_aJumpStats[client].Get(iJump, StatsArray_AfterGround);
+					g_aJumpStats[client].Set(iJump, iAfter + 1, StatsArray_AfterGround);
+				}
+				else if(fAbsVelocityZ < 0.0)
+					g_aStatsArray[client][StatsArray_BeforeGround]++;
+			}
+		}
+	}
 
-  else if(iButtonState == State_Releasing) {
-    g_iReleaseTick[client] = iTicks;
-  }
+	else if(iButtonState == State_Releasing) {
+		g_iReleaseTick[client] = iTicks;
+	}
 
-  if(!bTouchingGround && g_iAirticks[client]++ > TICKS_NOT_COUNT_AIR) {
-    ResetScrollStats(client);
-    return;
-  }
+	if(!bTouchingGround && g_iAirTicks[client]++ > TICKS_NOT_COUNT_AIR) {
+		ResetScrollStats(client);
+		return;
+	}
 
-  if(iGroundState == State_Landing) {
-    int iScrolls = g_aStatsArray[client][StatsArray_Scrolls];
+	if(iGroundState == State_Landing) {
+		int iScrolls = g_aStatsArray[client][StatsArray_Scrolls];
 
-    if(iScrolls == 0) {
-      ResetScrollStats(client);
-      return;
-    }
+		if(iScrolls == 0) {
+			ResetScrollStats(client);
+			return;
+		}
 
-    if(g_iGroundTicks[client] < TICKS_NOT_COUNT_JUMP) {
-      int iJump = g_iCurrentJump[client];
-      g_aJumpStats[client].Resize(iJump + 1);
+		if(g_iGroundTicks[client] < TICKS_NOT_COUNT_JUMP) {
+			int iJump = g_iCurrentJump[client];
+			g_aJumpStats[client].Resize(iJump + 1);
 
-      g_aJumpStats[client].Set(iJump, iScrolls, StatsArray_Scrolls);
-      g_aJumpStats[client].Set(iJump, g_aStatsArray[client][StatsArray_BeforeGround], StatsArray_BeforeGround);
-      g_aJumpStats[client].Set(iJump, 0, StatsArray_AfterGround);
-      g_aJumpStats[client].Set(iJump, (g_aStatsArray[client][StatsArray_AverageTicks] / iScrolls), StatsArray_AverageTicks);
-      g_aJumpStats[client].Set(iJump, g_aStatsArray[client][StatsArray_PerfectJump], StatsArray_PerfectJump);
+			g_aJumpStats[client].Set(iJump, iScrolls, StatsArray_Scrolls);
+			g_aJumpStats[client].Set(iJump, g_aStatsArray[client][StatsArray_BeforeGround], StatsArray_BeforeGround);
+			g_aJumpStats[client].Set(iJump, 0, StatsArray_AfterGround);
+			g_aJumpStats[client].Set(iJump, (g_aStatsArray[client][StatsArray_AverageTicks] / iScrolls), StatsArray_AverageTicks);
+			g_aJumpStats[client].Set(iJump, g_aStatsArray[client][StatsArray_PerfectJump], StatsArray_PerfectJump);
 
-      g_iCurrentJump[client]++;
-    }
+			g_iCurrentJump[client]++;
+		}
 
-    g_iGroundTicks[client] = 0;
+		g_iGroundTicks[client] = 0;
 
-    ResetScrollStats(client);
-  }
-  else if(iGroundState == State_Jumping && g_iCurrentJump[client] >= g_iSampleSize)
-    AnalyzeStats(client);
+		ResetScrollStats(client);
+	}
+	else if(iGroundState == State_Jumping && g_iCurrentJump[client] >= g_iSampleSize)
+		AnalyzeStats(client);
 }
 
 int Min(int a, int b) {
-  return (a < b) ? a:b;
+	return (a < b) ? a:b;
 }
 
 int Max(int a, int b) {
-  return (a > b) ? a:b;
+	return (a > b) ? a:b;
 }
 
 int Abs(int num) {
-  return (num < 0) ? -num:num;
+	return (num < 0) ? -num:num;
 }
 
 void AnalyzeStats(int client) {
-  int iPerfs = GetPerfs(client);
+	int iPerfs = GetPerfs(client);
 
-  // ints for checking...
-  int iHypeScroll = 0;
-  int iSameScroll = 0;
-  int iSimilarScroll = 0;
-  int iBadScrolls = 0;
-  int iGoodPre = 0;
-  int iGoodPost = 0;
-  int iSamePrePost = 0;
+	// ints for checking...
+	int iHypeScroll = 0;
+	int iSameScroll = 0;
+	int iSimilarScroll = 0;
+	int iBadScrolls = 0;
+	int iGoodPre = 0;
+	int iGoodPost = 0;
+	int iSamePrePost = 0;
 
-  for(int i = (g_iCurrentJump[client] - g_iSampleSize); i < g_iCurrentJump[client] - 1; i++) {
-    int iCurrentScrolls = g_aJumpStats[client].Get(i, StatsArray_Scrolls);
-    int iTicks = g_aJumpStats[client].Get(i, StatsArray_AverageTicks);
-    int iPre = g_aJumpStats[client].Get(i, StatsArray_BeforeGround);
-    int iPost = g_aJumpStats[client].Get(i, StatsArray_AfterGround);
+	for(int i = (g_iCurrentJump[client] - g_iSampleSize); i < g_iCurrentJump[client] - 1; i++) {
+		int iCurrentScrolls = g_aJumpStats[client].Get(i, StatsArray_Scrolls);
+		int iTicks = g_aJumpStats[client].Get(i, StatsArray_AverageTicks);
+		int iPre = g_aJumpStats[client].Get(i, StatsArray_BeforeGround);
+		int iPost = g_aJumpStats[client].Get(i, StatsArray_AfterGround);
 
-    if(i != g_iSampleSize - 1) {
-      int iNextScrolls = g_aJumpStats[client].Get(i + 1, StatsArray_Scrolls);
+		if(i != g_iSampleSize - 1) {
+			int iNextScrolls = g_aJumpStats[client].Get(i + 1, StatsArray_Scrolls);
 
-      if(iCurrentScrolls == iNextScrolls)
-        iSameScroll++;
+			if(iCurrentScrolls == iNextScrolls)
+				iSameScroll++;
 
-      if(abs(Max(iCurrentScrolls, iNextScrolls) - Min(iCurrentScrolls, iNextScrolls)) <= 2)
-        iSimilarScroll++;
-    }
+			if(Abs(Max(iCurrentScrolls, iNextScrolls) - Min(iCurrentScrolls, iNextScrolls)) <= 2)
+				iSimilarScroll++;
+		}
 
-    if(iCurrentScrolls >= 19)
-      iHypeScroll++;
+		if(iCurrentScrolls >= 19)
+			iHypeScroll++;
 
-    if(iTicks <= 2)
-      iBadScrolls++;
+		if(iTicks <= 2)
+			iBadScrolls++;
 
-    if(iPre <= 1)
-      iGoodPre++;
+		if(iPre <= 1)
+			iGoodPre++;
 
-    if(iPost == iPre)
-      iSamePrePost++;
-  }
+		if(iPost == iPre)
+			iSamePrePost++;
+	}
 
-  float fIntervals = (float(iBadScrolls) / g_iSampleSize);
+	float fIntervals = (float(iBadScrolls) / g_iSampleSize);
 
-  bool bDetection = true;
+	bool bDetection = true;
 
-  char[] szScrollStats = new char[300];
-  FormatScrolls(client, szScrollStats, 300);
+	char[] szScrollStats = new char[300];
+	FormatScrolls(client, szScrollStats, 300);
 
-  char szDESCID[32];
+	char szCheatInfo[512];
+	Format(szCheatInfo, 512, "Perfs- %i | Before Ground- %i | Post Ground- %i | Same Pre/Post- %i | Intervals- %.2f | Pattern array- %s", iPerfs, iGoodPre, iGoodPost, iSamePrePost, fIntervals, szScrollStats);
 
-  //im sorry
-  if(iPerfs == 100)
-    Format(szDESCID, 32, "DESC1");
+	//im sorry
+	if(iPerfs == 100)
+		AC_Trigger(client, T_DEF, DESC1, szCheatInfo);
 
-  else if(iPerfs >= 95)
-    Format(szDESCID, 32, "DESC2");
+	else if(iPerfs >= 95)
+		AC_Trigger(client, T_DEF, DESC2, szCheatInfo);
 
-  else if(iPerfs >= 85)
-    Format(szDESCID, 32, "DESC3");
+	else if(iPerfs >= 85)
+		AC_Trigger(client, T_DEF, DESC3, szCheatInfo);
 
-  else if(iPerfs >= 80)
-    Format(szDESCID, 32, "DESC4");
+	else if(iPerfs >= 80)
+		AC_Trigger(client, T_DEF, DESC4, szCheatInfo);
 
-  else if(iPerfs >= 75 && (iSameScroll >= 10 || iSimilarScroll >= 15))
-    Format(szDESCID, 32, "DESC5");
+	else if(iPerfs >= 75 && (iSameScroll >= 10 || iSimilarScroll >= 15))
+		AC_Trigger(client, T_DEF, DESC5, szCheatInfo);
 
-  else if(iPerfs >= 70 && iHypeScroll >= 3 && iSameScroll >= 3 && iSimilarScroll >= 7)
-    Format(szDESCID, 32, "DESC6");
+	else if(iPerfs >= 70 && iHypeScroll >= 3 && iSameScroll >= 3 && iSimilarScroll >= 7)
+		AC_Trigger(client, T_DEF, DESC6, szCheatInfo);
 
-  else if(iPerfs >= 40 && iGoodPre >= 40)
-    Format(szDESCID, 32, "DESC7");
+	else if(iPerfs >= 40 && iGoodPre >= 40)
+		AC_Trigger(client, T_HIGH, DESC7, szCheatInfo);
 
-  else if(iPerfs >= 40 && iGoodPost >= 40)
-    Format(szDESCID, 32, "DESC8");
+	else if(iPerfs >= 40 && iGoodPost >= 40)
+		AC_Trigger(client, T_HIGH, DESC8, szCheatInfo);
 
-  else if(iPerfs >= 50 && iSamePrePost >= 20)
-    Format(szDESCID, 32, "DESC9");
+	else if(iPerfs >= 50 && iSamePrePost >= 20)
+		AC_Trigger(client, T_HIGH, DESC9, szCheatInfo);
 
-  else if(iHypeScroll >= 15)
-    Format(szDESCID, 32, "DESC10");
+	else if(iHypeScroll >= 15)
+		AC_Trigger(client, T_MED, DESC10, szCheatInfo);
 
-  else if(fIntervals > 0.5)
-    Format(szDESCID, 32, "DESC11");
+	else if(fIntervals > 0.5)
+		AC_Trigger(client, T_HIGH, DESC11, szCheatInfo);
 
-  else if(fIntervals > 1.0)
-    Format(szDESCID, 32, "DESC12");
+	else if(fIntervals > 1.0)
+		AC_Trigger(client, T_MED, DESC12, szCheatInfo);
 
-  else
-    bDetection = false;
+	else
+		bDetection = false;
 
-  char szCheatInfo[512];
-  Format(szCheatInfo, 512, "Perfs- %i | Before Ground- %i | Post Ground- %i | Same Pre/Post- %i | Intervals- %.2f | Pattern array- %s", iPerfs, iGoodPre, iGoodPost, iSamePrePost, fIntervals, szScrollStats);
+	if(bDetection) {
+		ResetScrollStats(client);
+		g_iCurrentJump[client] = 0;
+		g_aJumpStats[client].Clear();
+	}
+}
 
-  if(bDetection) {
-    AC_Trigger(client, szLevel, szDESCID, szCheatInfo);1
-    ResetScrollStats(client);
-    g_iCurrentJump[client] = 0;
-    g_aJumpStats[client].Clear();
-  }
+bool IsValidClient(int client) {
+  return (0 < client <= MaxClients && IsClientInGame(client));
 }
