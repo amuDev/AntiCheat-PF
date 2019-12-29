@@ -272,27 +272,31 @@ void AnalyzeStats(int client) {
 			iZeroes++;
 	}
 
+	char szInfo[256];
+	Format(szInfo, 256, "Tick Difference: %i", iTickDifference);
+
 	if(iTickDifference < 3) {
-		AC_Trigger(client, T_DEF, DESC2);
+		AC_Trigger(client, T_DEF, DESC2, szInfo);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 	else if(iTickDifference < 6) {
-		AC_Trigger(client, T_HIGH, DESC2);
+		AC_Trigger(client, T_HIGH, DESC2, szInfo);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 	else if(iTickDifference < 9) {
-		AC_Trigger(client, T_MED, DESC2);
+		AC_Trigger(client, T_MED, DESC2, szInfo);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 	else if(iTickDifference < 15) {
-		AC_Trigger(client, T_LOW, DESC2);
+		AC_Trigger(client, T_LOW, DESC2, szInfo);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 
-	if(g_iBashTriggerCountdown[client] > 0) {
-		char[] szStrafeStats = new char[256];
-		FormatStrafes(client, szStrafeStats, 256);
+	char[] szStrafeStats = new char[256];
+	FormatStrafes(client, szStrafeStats, 256);
 
+
+	if(g_iBashTriggerCountdown[client] > 0) {
 		AC_NotifyAdmins("%s", szStrafeStats);
 
 		return;
@@ -319,9 +323,6 @@ void AnalyzeStats(int client) {
 	}
 
 	if(g_iBashTriggerCountdown[client] > 0) {
-		char[] szStrafeStats = new char[256];
-		FormatStrafes(client, szStrafeStats, 256);
-
 		AC_NotifyAdmins("%s", szStrafeStats);
 
 		return;

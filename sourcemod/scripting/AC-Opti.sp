@@ -321,16 +321,18 @@ Action SetupMove(int client, float angles[3]) {
 				}
 
 				// untested values
+				char szInfo[256];
+				Format(szInfo, 256, "Average Ticks: %i", iTickAverage);
 				if(iTickAverage < 5)
-					AC_Trigger(client, T_DEF, DESC1);
+					AC_Trigger(client, T_DEF, DESC1, szInfo);
 				else if(iTickAverage < 9)
-					AC_Trigger(client, T_HIGH, DESC1);
+					AC_Trigger(client, T_HIGH, DESC1, szInfo);
 				else if(iTickAverage < 12)
-					AC_Trigger(client, T_MED, DESC1);
+					AC_Trigger(client, T_MED, DESC1, szInfo);
 				else if(iTickAverage < 15)
-					AC_Trigger(client, T_LOW, DESC1);
+					AC_Trigger(client, T_LOW, DESC1, szInfo);
 				if(iPerfectTick > (iTick / 2))
-					AC_Trigger(client, T_DEF, DESC1);
+					AC_Trigger(client, T_DEF, DESC1, szInfo);
 				//if(iGreatTick > someval)
 			}
 
@@ -339,17 +341,20 @@ Action SetupMove(int client, float angles[3]) {
 
 		g_aDPTHistory[client].Push(fDPT);
 	}
+
+	char szInfo[256];
+	Format(szInfo, 256, "Distance Per Tick: %.2f", fDPT);
 	// client doesnt need to be in air for this to happen
 	// we did the calcs while in air...
 	// Do the DPT triggers here, not sure what values to use as this is my new method
 	if(fDPT <= 1)
-		AC_Trigger(client, T_DEF, DESC3);
+		AC_Trigger(client, T_DEF, DESC3, szInfo);
 	else if(fDPT <= 5.0)
-		AC_Trigger(client, T_HIGH, DESC3);
+		AC_Trigger(client, T_HIGH, DESC3, szInfo);
 	else if(fDPT <= 7.5)
-		AC_Trigger(client, T_MED, DESC3);
+		AC_Trigger(client, T_MED, DESC3, szInfo);
 	else if(fDPT <= 10.0)
-		AC_Trigger(client, T_LOW, DESC3);
+		AC_Trigger(client, T_LOW, DESC3, szInfo);
 
 	g_fPreviousDeltaAngleAbs[client] = fDeltaAngleAbs;
 

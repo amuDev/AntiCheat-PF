@@ -23,7 +23,7 @@ float g_fPreviousAngle[MAXPLAYERS+1];
 ArrayList g_aEyeAngleHistory[MAXPLAYERS+1];
 
 public Plugin myinfo = {
-	name = "e",
+	name = "",
 	author = "",
 	description = "",
 	version = "",
@@ -117,15 +117,17 @@ Action SetupMove(int client, float eyeAngles[3]) {
 	// is the client in air?
 	if((iFlags & (FL_ONGROUND | FL_INWATER)) == 0) {
 		g_aEyeAngleHistory[client].Push(eyeAngles[1]);
+		char szInfo[256];
+		Format(szInfo, 256, "Perfect Angles: %i", g_iPerfectAng[client]);
 		if(g_fPreviousAngle[client] == eyeAngles[1]) {
-			AC_Trigger(client, T_MED, DESC1);
+			AC_Trigger(client, T_MED, DESC1, szInfo);
 			g_iPerfectAng[client]++;
 		}
 		if(g_iPerfectAng[client] >= 10) {
-			AC_Trigger(client, T_HIGH, DESC1);
+			AC_Trigger(client, T_HIGH, DESC1, szInfo);
 		}
 		else if(g_iPerfectAng[client] >= 25) {
-			AC_Trigger(client, T_DEF, DESC1)
+			AC_Trigger(client, T_DEF, DESC1, szInfo);
 		}
 	}
 	else {
