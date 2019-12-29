@@ -81,7 +81,7 @@ public SharedPlugin __pl_ac = {
 #endif
 };
 
-if !defined REQUIRE_PLUGIN
+#if !defined REQUIRE_PLUGIN
 public void __pl_ac_SetNTVOptional() {
   //MarkNativeAsOptional("AC_Triggered");
   MarkNativeAsOptional("AC_Trigger");
