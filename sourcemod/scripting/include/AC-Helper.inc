@@ -28,7 +28,7 @@ enum {
  * @param cheatInfo     The stats that were detected and assumed cheated.
  * @noreturn
  */
-native void AC_Trigger(int client, int &level, char[] cheatDesc, char[] cheatInfo);
+native void AC_Trigger(int client, int level, char[] cheatDesc, char[] cheatInfo);
 
 /**
  * Prints a message to admins in chat and console, plays short beep sound.
