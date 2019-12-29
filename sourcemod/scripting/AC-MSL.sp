@@ -23,7 +23,7 @@ float g_fPreviousAngle[MAXPLAYERS+1];
 ArrayList g_aEyeAngleHistory[MAXPLAYERS+1];
 
 public Plugin myinfo = {
-	name = "",
+	name = "e",
 	author = "",
 	description = "",
 	version = "",
