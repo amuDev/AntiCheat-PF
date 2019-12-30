@@ -22,6 +22,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	//CreateNative("AC_Triggered", Native_Triggered); removed unless i need it...
 	CreateNative("AC_Trigger", Native_Trigger);
 	CreateNative("AC_NotifyAdmins", Native_NotifyAdmins);
+	CreateNative("AC_NotifyDiscord", Native_NotifyDiscord);
 	CreateNative("AC_LogToServer", Native_LogToServer);
 	CreateNative("AC_IsTesting", Native_IsTesting);
 
@@ -75,10 +76,8 @@ public int Native_Trigger(Handle plugin, int numParams) {
 
 	char[] szLevel = new char[16];
 	char[] szCheatDesc = new char[32];
-	char[] szCheatInfo = new char[300];
 
 	GetNativeString(3, szCheatDesc, 32);
-	GetNativeString(4, szCheatInfo, 512);
 
 	if(level == T_LOW) {
 		strcopy(szLevel, 16, "LOW");
@@ -129,6 +128,10 @@ public int Native_NotifyAdmins(Handle plugin, int numParams) {
 		}
 	}
 	g_bLowDetection = false;
+}
+
+public int Native_NotifyDiscord(Handle plugin, int numParams) {
+	
 }
 
 public int Native_LogToServer(Handle plugin, int numParams) {
