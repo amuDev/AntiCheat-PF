@@ -9,7 +9,7 @@
 #define DESC3 "Perfect Turn Rate"
 //#define DESC4 ""
 
-#define SAMPLE_SIZE 35
+#define SAMPLE_SIZE 45
 
 char g_szLogPath[PLATFORM_MAX_PATH];
 
@@ -138,6 +138,8 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 	if(!IsMoveTypeLeagl(client))
 		return Plugin_Continue;
 
+	g_iAbsTicks[client]++;
+
 	if(fDeltaAngle > 180.0)
 		fDeltaAngle -= 360.0;
 
@@ -171,7 +173,7 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 					((g_iPreviousButtons[client] & IN_BACK) > 0 && (g_iPreviousButtons[client] & IN_FORWARD) > 0))) {
 				// sorry for that...
 				g_bKeyChanged[client] = true;
-				g_iKeyTransitionTick[client] = g_iAbsTicks[client];
+					g_iKeyTransitionTick[client] = g_iAbsTicks[client];
 			}
 		}
 

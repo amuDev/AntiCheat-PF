@@ -114,8 +114,16 @@ Action SetupMove(int client, float eyeAngles[3]) {
 	// if 2 eyeAngles are the same client is probably MSLing
 	int iFlags = GetEntityFlags(client);
 
+	// to check they actually moved their mouse
+	float fDeltaAngle = eyeAngles[1] - g_fPreviousAngle[client];
+	float fDeltaAngleAbs = FloatAbs(fDeltaAngle);
+
 	// is the client in air?
 	if((iFlags & (FL_ONGROUND | FL_INWATER)) == 0) {
+		if(fDeltaAngleAbs == 0.0) {
+			//PrintToChat(client, "1");
+			return Plugin_Continue;
+		}
 		g_aEyeAngleHistory[client].Push(eyeAngles[1]);
 		char szInfo[256];
 		Format(szInfo, 256, "Perfect Angles: %i", g_iPerfectAng[client]);

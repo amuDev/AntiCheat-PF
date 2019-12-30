@@ -247,6 +247,8 @@ Action SetupMove(int client, float angles[3]) {
 	if(!IsMoveTypeLeagl(client))
 		return Plugin_Continue;
 
+	g_iAbsTicks[client]++;
+
 	if(fDeltaAngle > 180.0)
 		fDeltaAngle -= 360.0;
 
@@ -293,8 +295,8 @@ Action SetupMove(int client, float angles[3]) {
 			float fAngDifference = FloatAbs(fTurningAngle - g_fPreviousTurningAngle[client]);
 
 			// if the floats are the same dont update array
-			if(fTurningAngle != g_fPreviousTurningAngle[client])
-				g_aAirPathHistory[client].Push(fAngDifference);
+			//if(fTurningAngle != g_fPreviousTurningAngle[client])
+			g_aAirPathHistory[client].Push(fAngDifference);
 
 			// Start checking for perfect airpath
 			if(g_bCanCheck[client]) {
@@ -347,7 +349,7 @@ Action SetupMove(int client, float angles[3]) {
 	// client doesnt need to be in air for this to happen
 	// we did the calcs while in air...
 	// Do the DPT triggers here, not sure what values to use as this is my new method
-	if(fDPT <= 1)
+/*	if(fDPT >= 1)
 		AC_Trigger(client, T_DEF, DESC3, szInfo);
 	else if(fDPT <= 5.0)
 		AC_Trigger(client, T_HIGH, DESC3, szInfo);
@@ -355,7 +357,7 @@ Action SetupMove(int client, float angles[3]) {
 		AC_Trigger(client, T_MED, DESC3, szInfo);
 	else if(fDPT <= 10.0)
 		AC_Trigger(client, T_LOW, DESC3, szInfo);
-
+*/
 	g_fPreviousDeltaAngleAbs[client] = fDeltaAngleAbs;
 
 	return Plugin_Continue;
