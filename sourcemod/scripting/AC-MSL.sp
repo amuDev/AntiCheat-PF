@@ -104,7 +104,7 @@ void FormatEyeAngles(int client, char[] buffer, int maxlength) {
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3]) {
-	if(!IsValidClient(client))
+	if(!IsValidClient(client) || !IsMoveTypeLeagl(client) || !AC_AllowDetect(client))
 		return Plugin_Continue;
 	return SetupMove(client, angles);
 }

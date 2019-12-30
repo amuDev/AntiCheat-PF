@@ -439,5 +439,5 @@ void AnalyzeStats(int client) {
 }
 
 bool IsValidClient(int client) {
-  return (0 < client <= MaxClients && IsClientInGame(client));
+	return (0 < client <= MaxClients && IsClientInGame(client));
 }

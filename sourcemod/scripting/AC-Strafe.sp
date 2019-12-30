@@ -126,7 +126,7 @@ void FormatStrafes(int client, char[] buffer, int maxlength) {
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3]) {
-	if(!IsValidClient(client))
+	if(!IsValidClient(client) || !IsMoveTypeLeagl(client) || !AC_AllowDetect(client))
 		return Plugin_Continue;
 	return SetupMove(client, buttons, angles, vel);
 }
@@ -134,9 +134,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 	float fDeltaAngle = angles[1] - g_fPreviousAngle[client];
 	g_fPreviousAngle[client] = angles[1];
-
-	if(!IsMoveTypeLeagl(client))
-		return Plugin_Continue;
 
 	g_iAbsTicks[client]++;
 
