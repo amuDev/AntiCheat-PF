@@ -1,5 +1,8 @@
 #include <sourcemod>
 #include <AC-Helper>
+#include <discord>
+
+#define WEBHOOK "https://discordapp.com/api/webhooks/661122011057356801/_F3mx35nEoljhrIrm6WTKr52PH6J-A-e2MCInOvHQ1HyRgr0l0P4UdFZZfEojn8UIYiJ/slack"
 
 #pragma newdecls required
 #pragma semicolon 1
@@ -15,7 +18,7 @@ public Plugin myinfo = {
 	author = "hiiamu, zwolof, powerind",
 	description = "Main module for cheat detections",
 	version = "0.1.0",
-	url = "/id/hiiamu/, /id/zwolof/, /id/powerind/"
+	url = "/id/hiiamu/, /id/powerind/"
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
@@ -131,6 +134,41 @@ public int Native_NotifyAdmins(Handle plugin, int numParams) {
 }
 
 public int Native_NotifyDiscord(Handle plugin, int numParams) {
+	
+	int client = GetNativeCell(1);
+    int level = GetNativeCell(2);
+
+    char[] szLevel = new char[16];
+    char[] szCheatDesc = new char[32];
+    char[] szCheatInfo = new char[512];
+ 
+    GetNativeString(3, szCheatDesc, 32);
+    GetNativeString(4, szCheatInfo, 512);
+    
+   	DiscordWebHook hook = new DiscordWebHook(WEBHOOK);
+	hook.SlackMode = true;
+	
+	hook.SetContent("@here");
+	hook.SetUsername("Fucking Anti Cheat");
+	
+	MessageEmbed Embed = new MessageEmbed();
+	
+	Embed.SetColor("#be9764");
+	Embed.SetTitle("A fu");
+	Embed.AddField("Field1", "Test1", true);
+	Embed.AddField("abc def", "deef", true);
+	
+	hook.Embed(Embed);
+	
+	hook.Send();
+	delete hook;
+	
+	hook = new DiscordWebHook("https://discordapp.com/api/webhooks/661122011057356801/_F3mx35nEoljhrIrm6WTKr52PH6J-A-e2MCInOvHQ1HyRgr0l0P4UdFZZfEojn8UIYiJ/slack");
+	hook.SetUsername("Testing");
+	hook.SlackMode = false;
+	hook.SetContent("Testing 1 2 3");
+	hook.Send();
+	delete hook;
 	
 }
 
