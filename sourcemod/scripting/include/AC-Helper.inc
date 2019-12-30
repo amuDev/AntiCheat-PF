@@ -28,7 +28,7 @@ enum {
  * @param cheatInfo     The stats that were detected and assumed cheated.
  * @noreturn
  */
-native void AC_Trigger(int client, int level, char[] cheatDesc, char[] cheatInfo);
+native void AC_Trigger(int client, int level, char[] cheatDesc);
 
 /**
  * Prints a message to admins in chat and console, plays short beep sound.
@@ -38,6 +38,17 @@ native void AC_Trigger(int client, int level, char[] cheatDesc, char[] cheatInfo
  * @noreturn
  */
 native void AC_NotifyAdmins(const char[] format, any ...);
+
+/**
+ * Notify discord webhook
+ *
+ * @param client        Client entity index.
+ * @param level         Trigger level, see enum.
+ * @param cheatDesc     Short name of the detected cheat.
+ * @param cheatInfo     The stats that were detected and assumed cheated.
+ * @noreturn
+ */
+native void AC_NotifyDiscord(int client, int level, char[] cheatDesc, char[] cheatInfo);
 
 /**
  * Logs detections to specified log file.
@@ -93,9 +104,9 @@ public SharedPlugin __pl_ac = {
 
 #if !defined REQUIRE_PLUGIN
 public void __pl_ac_SetNTVOptional() {
-	//MarkNativeAsOptional("AC_Triggered");
 	MarkNativeAsOptional("AC_Trigger");
 	MarkNativeAsOptional("AC_NotifyAdmins");
+	MarkNativeAsOptional("AC_NotifyDiscord");
 	MarkNativeAsOptional("AC_LogToServer");
 	MarkNativeAsOptional("AC_IsTesting");
 }
