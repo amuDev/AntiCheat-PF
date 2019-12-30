@@ -1,9 +1,9 @@
 enum {
-  T_LOW,
-  T_MED,
-  T_HIGH,
-  T_DEF,
-  T_TEST
+	T_LOW,
+	T_MED,
+	T_HIGH,
+	T_DEF,
+	T_TEST
 };
 
 /**
@@ -57,6 +57,15 @@ native void AC_LogToServer(const char[] format, any ...);
 native bool AC_IsTesting(int client);
 
 /**
+ * Built to not false pos on bad players (tends to happen without this)
+ *
+ * @param client        Client entity index.
+ * @param bestLJ        Short name of best LJ ex. Green, Red, Gold.
+ * @return              True if their pb is high enough.
+ */
+native bool AC_AllowDetect(int client);
+
+/**
  * Check to not false pos while in various states.
  *
  * @param client				Client entity index.
@@ -64,29 +73,47 @@ native bool AC_IsTesting(int client);
  * @return 						  True if the test passed.
  */
 stock bool IsMoveTypeLeagl(int client, bool water = true) {
-  MoveType iMoveType = GetEntityMoveType(client);
+	MoveType iMoveType = GetEntityMoveType(client);
 
-  return(!water || GetEntProp(client, Prop_Data, "m_nWaterLevel") < 2) &&
-        (GetEntityFlags(client) & FL_ATCONTROLS) == 0 &&
-        (iMoveType == MOVETYPE_WALK || iMoveType == MOVETYPE_ISOMETRIC || iMoveType == MOVETYPE_LADDER);
+	return(!water || GetEntProp(client, Prop_Data, "m_nWaterLevel") < 2) &&
+				(GetEntityFlags(client) & FL_ATCONTROLS) == 0 &&
+				(iMoveType == MOVETYPE_WALK || iMoveType == MOVETYPE_ISOMETRIC || iMoveType == MOVETYPE_LADDER);
 }
 
+// handles most the natives
 public SharedPlugin __pl_ac = {
-  name = "AC-Main",
-  file = "AC-Main.smx",
+	name = "AC-Main",
+	file = "AC-Main.smx",
 #if defined REQUIRE_PLUGIN
-  required = 1
+	required = 1
 #else
-  required = 0
+	required = 0
 #endif
 };
 
 #if !defined REQUIRE_PLUGIN
 public void __pl_ac_SetNTVOptional() {
-  //MarkNativeAsOptional("AC_Triggered");
-  MarkNativeAsOptional("AC_Trigger");
-  MarkNativeAsOptional("AC_NotifyAdmins");
-  MarkNativeAsOptional("AC_LogToServer");
-  MarkNativeAsOptional("AC_IsTesting");
+	//MarkNativeAsOptional("AC_Triggered");
+	MarkNativeAsOptional("AC_Trigger");
+	MarkNativeAsOptional("AC_NotifyAdmins");
+	MarkNativeAsOptional("AC_LogToServer");
+	MarkNativeAsOptional("AC_IsTesting");
+}
+#endif
+
+// handles if someone can get detected for mouse movements and strafe stats
+public SharedPlugin __pl_js = {
+	name = "JS-Module",
+	file = "JumpStats.smx",
+#if defined REQUIRE_PLUGIN
+	required = 1
+#else
+	required = 0
+#endif
+};
+
+#if !defined REQUIRE_PLUGIN
+public void __pl_js_SetNTVOptional() {
+	MarkNativeAsOptional("AC_AllowDetect");
 }
 #endif
