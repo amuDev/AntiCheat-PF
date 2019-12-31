@@ -392,42 +392,54 @@ void AnalyzeStats(int client) {
 	Format(szCheatInfo, 512, "Perfs- %i | Before Ground- %i | Post Ground- %i | Same Pre/Post- %i | Intervals- %.2f | Pattern array- %s", iPerfs, iGoodPre, iGoodPost, iSamePrePost, fIntervals, szScrollStats);
 
 	//im sorry
-	if(iPerfs == 100)
-		AC_Trigger(client, T_DEF, DESC1, szCheatInfo);
-
-	else if(iPerfs >= 95)
-		AC_Trigger(client, T_DEF, DESC2, szCheatInfo);
-
-	else if(iPerfs >= 85)
-		AC_Trigger(client, T_DEF, DESC3, szCheatInfo);
-
-	else if(iPerfs >= 80)
-		AC_Trigger(client, T_DEF, DESC4, szCheatInfo);
-
-	else if(iPerfs >= 75 && (iSameScroll >= 10 || iSimilarScroll >= 15))
-		AC_Trigger(client, T_DEF, DESC5, szCheatInfo);
-
-	else if(iPerfs >= 70 && iHypeScroll >= 3 && iSameScroll >= 3 && iSimilarScroll >= 7)
-		AC_Trigger(client, T_DEF, DESC6, szCheatInfo);
-
-	else if(iPerfs >= 40 && iGoodPre >= 40)
-		AC_Trigger(client, T_HIGH, DESC7, szCheatInfo);
-
-	else if(iPerfs >= 40 && iGoodPost >= 40)
-		AC_Trigger(client, T_HIGH, DESC8, szCheatInfo);
-
-	else if(iPerfs >= 50 && iSamePrePost >= 20)
-		AC_Trigger(client, T_HIGH, DESC9, szCheatInfo);
-
-	else if(iHypeScroll >= 15)
-		AC_Trigger(client, T_MED, DESC10, szCheatInfo);
-
-	else if(fIntervals > 0.5)
-		AC_Trigger(client, T_HIGH, DESC11, szCheatInfo);
-
-	else if(fIntervals > 1.0)
-		AC_Trigger(client, T_MED, DESC12, szCheatInfo);
-
+	if(iPerfs == 100) {
+		AC_Trigger(client, T_DEF, DESC1);
+		AC_NotifyDiscord(client, T_DEF, DESC1, szCheatInfo);
+	}
+	else if(iPerfs >= 95) {
+		AC_Trigger(client, T_DEF, DESC2);
+		AC_NotifyDiscord(client, T_DEF, DESC2, szCheatInfo);
+	}
+	else if(iPerfs >= 85) {
+		AC_Trigger(client, T_DEF, DESC3);
+		AC_NotifyDiscord(client, T_DEF, DESC3, szCheatInfo);
+	}
+	else if(iPerfs >= 80) {
+		AC_Trigger(client, T_DEF, DESC4);
+		AC_NotifyDiscord(client, T_DEF, DESC4, szCheatInfo);
+	}
+	else if(iPerfs >= 75 && (iSameScroll >= 10 || iSimilarScroll >= 15)) {
+		AC_Trigger(client, T_DEF, DESC5);
+		AC_NotifyDiscord(client, T_DEF, DESC5, szCheatInfo);
+	}
+	else if(iPerfs >= 70 && iHypeScroll >= 3 && iSameScroll >= 3 && iSimilarScroll >= 7) {
+		AC_Trigger(client, T_DEF, DESC6);
+		AC_NotifyDiscord(client, T_DEF, DESC6, szCheatInfo);
+	}
+	else if(iPerfs >= 40 && iGoodPre >= 40) {
+		AC_Trigger(client, T_HIGH, DESC7);
+		AC_NotifyDiscord(client, T_HIGH, DESC7, szCheatInfo);
+	}
+	else if(iPerfs >= 40 && iGoodPost >= 40) {
+		AC_Trigger(client, T_HIGH, DESC8);
+		AC_NotifyDiscord(client, T_HIGH, DESC8, szCheatInfo);
+	}
+	else if(iPerfs >= 50 && iSamePrePost >= 20) {
+		AC_Trigger(client, T_HIGH, DESC9);
+		AC_NotifyDiscord(client, T_HIGH, DESC9, szCheatInfo);
+	}
+	else if(iHypeScroll >= 15) {
+		AC_Trigger(client, T_MED, DESC10);
+		AC_NotifyDiscord(client, T_MED, DESC10, szCheatInfo);
+	}
+	else if(fIntervals > 0.5) {
+		AC_Trigger(client, T_HIGH, DESC11);
+		AC_NotifyDiscord(client, T_HIGH, DESC11, szCheatInfo);
+	}
+	else if(fIntervals > 1.0) {
+		AC_Trigger(client, T_MED, DESC12);
+		AC_NotifyDiscord(client, T_MED, DESC12, szCheatInfo);
+	}
 	else
 		bDetection = false;
 

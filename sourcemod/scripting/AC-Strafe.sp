@@ -170,7 +170,7 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 					((g_iPreviousButtons[client] & IN_BACK) > 0 && (g_iPreviousButtons[client] & IN_FORWARD) > 0))) {
 				// sorry for that...
 				g_bKeyChanged[client] = true;
-					g_iKeyTransitionTick[client] = g_iAbsTicks[client];
+				g_iKeyTransitionTick[client] = g_iAbsTicks[client];
 			}
 		}
 
@@ -235,14 +235,28 @@ Action SetupMove(int client, int &buttons, float angles[3], float vel[3]) {
 	// i think i did maths wrong here?
 	//TODO
 	if((FloatAbs(fDeltaAngleAbs - g_fPreviousOptimizedAngle[client]) <= (g_fPreviousOptimizedAngle[client] / 128.0) && fSpeed < 2560.0)) {
-		if(++g_iPerfAngleStreak[client] == 10)
-			AC_Trigger(client, T_LOW, DESC3, "fuck");
-		else if(g_iPerfAngleStreak[client] == 30)
-			AC_Trigger(client, T_MED, DESC3, "heck");
-		else if(g_iPerfAngleStreak[client] == 40)
-			AC_Trigger(client, T_HIGH, DESC3, "save me");
-		else if(g_iPerfAngleStreak[client] == 50)
-			AC_Trigger(client, T_DEF, DESC3, "help");
+		char[] szStrafeStats = new char[256];
+		FormatStrafes(client, szStrafeStats, 256);
+		char szBuffer[256];
+		Format(szBuffer, 256, "Perf angles: %i", g_iPerfAngleStreak[client]);
+		StrCat(szStrafeStats, 256, szBuffer);
+
+		if(++g_iPerfAngleStreak[client] == 10) {
+			AC_Trigger(client, T_LOW, DESC3);
+			AC_NotifyDiscord(client, T_LOW, DESC3, szStrafeStats);
+		}
+		else if(g_iPerfAngleStreak[client] == 30) {
+			AC_Trigger(client, T_MED, DESC3);
+			AC_NotifyDiscord(client, T_MED, DESC3, szStrafeStats);
+		}
+		else if(g_iPerfAngleStreak[client] == 40) {
+			AC_Trigger(client, T_HIGH, DESC3);
+			AC_NotifyDiscord(client, T_HIGH, DESC3, szStrafeStats);
+		}
+		else if(g_iPerfAngleStreak[client] == 50) {
+			AC_Trigger(client, T_DEF, DESC3);
+			AC_NotifyDiscord(client, T_DEF, DESC3, szStrafeStats);
+		}
 	}
 	else
 		g_iPerfAngleStreak[client] = 0;
@@ -271,29 +285,34 @@ void AnalyzeStats(int client) {
 			iZeroes++;
 	}
 
-	char szInfo[256];
-	Format(szInfo, 256, "Tick Difference: %i", iTickDifference);
-
-	if(iTickDifference < 3) {
-		AC_Trigger(client, T_DEF, DESC2, szInfo);
-		g_iBashTriggerCountdown[client] = 35;
-	}
-	else if(iTickDifference < 6) {
-		AC_Trigger(client, T_HIGH, DESC2, szInfo);
-		g_iBashTriggerCountdown[client] = 35;
-	}
-	else if(iTickDifference < 9) {
-		AC_Trigger(client, T_MED, DESC2, szInfo);
-		g_iBashTriggerCountdown[client] = 35;
-	}
-	else if(iTickDifference < 15) {
-		AC_Trigger(client, T_LOW, DESC2, szInfo);
-		g_iBashTriggerCountdown[client] = 35;
-	}
-
 	char[] szStrafeStats = new char[256];
 	FormatStrafes(client, szStrafeStats, 256);
 
+	char szInfo[256];
+	Format(szInfo, 256, "Tick Difference: %i", iTickDifference);
+
+	StrCat(szStrafeStats, 256, szInfo);
+
+	if(iTickDifference < 3) {
+		AC_Trigger(client, T_DEF, DESC2);
+		AC_NotifyDiscord(client, T_DEF, DESC2, szStrafeStats);
+		g_iBashTriggerCountdown[client] = 35;
+	}
+	else if(iTickDifference < 6) {
+		AC_Trigger(client, T_HIGH, DESC2);
+		AC_NotifyDiscord(client, T_HIGH, DESC2, szStrafeStats);
+		g_iBashTriggerCountdown[client] = 35;
+	}
+	else if(iTickDifference < 9) {
+		AC_Trigger(client, T_MED, DESC2);
+		AC_NotifyDiscord(client, T_MED, DESC2, szStrafeStats);
+		g_iBashTriggerCountdown[client] = 35;
+	}
+	else if(iTickDifference < 15) {
+		AC_Trigger(client, T_LOW, DESC2);
+		AC_NotifyDiscord(client, T_LOW, DESC2, szStrafeStats);
+		g_iBashTriggerCountdown[client] = 35;
+	}
 
 	if(g_iBashTriggerCountdown[client] > 0) {
 		AC_NotifyAdmins("%s", szStrafeStats);
@@ -302,22 +321,26 @@ void AnalyzeStats(int client) {
 	}
 
 	if(iZeroes > 30) {
-		AC_Trigger(client, T_DEF, DESC1, szStrafeStats);
+		AC_Trigger(client, T_DEF, DESC1);
+		AC_NotifyDiscord(client, T_DEF, DESC1, szStrafeStats);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 
 	else if(iZeroes > 27) {
-		AC_Trigger(client, T_HIGH, DESC1, szStrafeStats);
+		AC_Trigger(client, T_HIGH, DESC1);
+		AC_NotifyDiscord(client, T_HIGH, DESC1, szStrafeStats);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 
 	else if(iZeroes > 23) {
-		AC_Trigger(client, T_MED, DESC1, szStrafeStats);
+		AC_Trigger(client, T_MED, DESC1);
+		AC_NotifyDiscord(client, T_MED, DESC1, szStrafeStats);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 
 	else if(iZeroes > 19) {
-		AC_Trigger(client, T_LOW, DESC1, szStrafeStats);
+		AC_Trigger(client, T_LOW, DESC1);
+		AC_NotifyDiscord(client, T_LOW, DESC1, szStrafeStats);
 		g_iBashTriggerCountdown[client] = 35;
 	}
 

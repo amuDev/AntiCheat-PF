@@ -322,16 +322,26 @@ Action SetupMove(int client, float angles[3]) {
 				// untested values
 				char szInfo[256];
 				Format(szInfo, 256, "Average Ticks: %i", iTickAverage);
-				if(iTickAverage < 5)
-					AC_Trigger(client, T_DEF, DESC1, szInfo);
-				else if(iTickAverage < 9)
-					AC_Trigger(client, T_HIGH, DESC1, szInfo);
-				else if(iTickAverage < 12)
-					AC_Trigger(client, T_MED, DESC1, szInfo);
-				else if(iTickAverage < 15)
-					AC_Trigger(client, T_LOW, DESC1, szInfo);
-				if(iPerfectTick > (iTick / 2))
-					AC_Trigger(client, T_DEF, DESC1, szInfo);
+				if(iTickAverage < 5) {
+					AC_Trigger(client, T_DEF, DESC1);
+					AC_NotifyDiscord(client, T_DEF, DESC1, szInfo);
+				}
+				else if(iTickAverage < 9) {
+					AC_Trigger(client, T_HIGH, DESC1);
+					AC_NotifyDiscord(client, T_HIGH, DESC1, szInfo);
+				}
+				else if(iTickAverage < 12) {
+					AC_Trigger(client, T_MED, DESC1);
+					AC_NotifyDiscord(client, T_MED, DESC1, szInfo);
+				}
+				else if(iTickAverage < 15) {
+					AC_Trigger(client, T_LOW, DESC1);
+					AC_NotifyDiscord(client, T_LOW, DESC1, szInfo);
+				}
+				if(iPerfectTick > (iTick / 2)) {
+					AC_Trigger(client, T_DEF, DESC1);
+					AC_NotifyDiscord(client, T_DEF, DESC1, szInfo);
+				}
 				//if(iGreatTick > someval)
 			}
 

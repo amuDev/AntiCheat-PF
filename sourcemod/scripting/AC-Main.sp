@@ -134,42 +134,59 @@ public int Native_NotifyAdmins(Handle plugin, int numParams) {
 }
 
 public int Native_NotifyDiscord(Handle plugin, int numParams) {
-	
 	int client = GetNativeCell(1);
-    int level = GetNativeCell(2);
+	int level = GetNativeCell(2);
 
-    char[] szLevel = new char[16];
-    char[] szCheatDesc = new char[32];
-    char[] szCheatInfo = new char[512];
- 
-    GetNativeString(3, szCheatDesc, 32);
-    GetNativeString(4, szCheatInfo, 512);
-    
-   	DiscordWebHook hook = new DiscordWebHook(WEBHOOK);
+	char[] szLevel = new char[16];
+	char[] szCheatDesc = new char[32];
+	char[] szCheatInfo = new char[512];
+
+	GetNativeString(3, szCheatDesc, 32);
+	GetNativeString(4, szCheatInfo, 512);
+
+	if(level == T_LOW)
+		strcopy(szLevel, 16, "LOW");
+	else if(level == T_MED)
+		strcopy(szLevel, 16, "MEDIUM");
+	else if(level == T_HIGH)
+		strcopy(szLevel, 16, "HIGH");
+	else if(level == T_DEF)
+		strcopy(szLevel, 16, "DEFINITIVE");
+
+	char szTitle[64];
+	Format(szTitle, 64, "%N FOR %s", client, szCheatDesc);
+
+	char szLevelField[32];
+	Format(szLevelField, 32, "%s", szLevel);
+
+	char szInfoField[256];
+	Format(szInfoField, 256, "%s", szCheatInfo);
+
+	DiscordWebHook hook = new DiscordWebHook(WEBHOOK);
 	hook.SlackMode = true;
-	
+
 	hook.SetContent("@here");
-	hook.SetUsername("Fucking Anti Cheat");
-	
+	hook.SetUsername("Anti-Cheat");
+
 	MessageEmbed Embed = new MessageEmbed();
-	
+
 	Embed.SetColor("#be9764");
-	Embed.SetTitle("A fu");
-	Embed.AddField("Field1", "Test1", true);
-	Embed.AddField("abc def", "deef", true);
-	
+	Embed.SetTitle(szTitle);
+	Embed.AddField("Level", szLevelField, true);
+	Embed.AddField("Info", szInfoField, true);
+
 	hook.Embed(Embed);
-	
+
 	hook.Send();
 	delete hook;
-	
+/*
 	hook = new DiscordWebHook("https://discordapp.com/api/webhooks/661122011057356801/_F3mx35nEoljhrIrm6WTKr52PH6J-A-e2MCInOvHQ1HyRgr0l0P4UdFZZfEojn8UIYiJ/slack");
-	hook.SetUsername("Testing");
+	hook.SetUsername("Anti-Cheat");
 	hook.SlackMode = false;
 	hook.SetContent("Testing 1 2 3");
 	hook.Send();
 	delete hook;
-	
+*/
 }
 
 public int Native_LogToServer(Handle plugin, int numParams) {
