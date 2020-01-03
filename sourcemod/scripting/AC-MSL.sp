@@ -13,8 +13,6 @@
 // 200 is ~2 jumps
 #define SAMPLE_SIZE 200
 
-//char g_szLogPath[PLATFORM_MAX_PATH];
-
 int g_iCurrentTick[MAXPLAYERS+1]
 	, g_iPerfectAng[MAXPLAYERS+1];
 
@@ -118,12 +116,12 @@ Action SetupMove(int client, float eyeAngles[3]) {
 	float fDeltaAngle = eyeAngles[1] - g_fPreviousAngle[client];
 	float fDeltaAngleAbs = FloatAbs(fDeltaAngle);
 
+	// We dont punish for detections as they could (unlikley) not move their
+	// mouse for 10 or more ticks in air and still git a red+ stat...
+	// Just notify discord with detection level and let admins deal with it
+
 	// is the client in air?
 	if((iFlags & (FL_ONGROUND | FL_INWATER)) == 0) {
-		if(fDeltaAngleAbs == 0.0) {
-			//PrintToChat(client, "1");
-			return Plugin_Continue;
-		}
 		g_aEyeAngleHistory[client].Push(eyeAngles[1]);
 		char szInfo[256];
 		Format(szInfo, 256, "Perfect Angles: %i", g_iPerfectAng[client]);
@@ -133,11 +131,11 @@ Action SetupMove(int client, float eyeAngles[3]) {
 			g_iPerfectAng[client]++;
 		}
 		if(g_iPerfectAng[client] >= 10) {
-			AC_Trigger(client, T_HIGH, DESC1);
+			AC_Trigger(client, T_MED, DESC1);
 			AC_NotifyDiscord(client, T_HIGH, DESC1, szInfo);
 		}
 		else if(g_iPerfectAng[client] >= 25) {
-			AC_Trigger(client, T_DEF, DESC1);
+			AC_Trigger(client, T_MED, DESC1);
 			AC_NotifyDiscord(client, T_DEF, DESC1, szInfo);
 		}
 	}

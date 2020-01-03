@@ -42,16 +42,14 @@ int g_iSampleSize = 45
 	, g_iPreviousButtons[MAXPLAYERS+1]
 	, g_iCurrentJump[MAXPLAYERS+1];
 
-char g_szLogPath[PLATFORM_MAX_PATH];
-
 ArrayList g_aJumpStats[MAXPLAYERS+1];
 
 public Plugin myinfo = {
-	name = "",
-	author = "",
-	description = "",
-	version = "",
-	url = ""
+	name = "AC Scroll Module",
+	author = "hiiamu",
+	description = "scroll module for AC",
+	version = "0.1.0",
+	url = "/id/hiiamu"
 }
 
 // enums for jummping checks
@@ -85,8 +83,6 @@ public void OnPluginStart() {
 			OnClientPutInServer(i);
 	}
 	RegConsoleCmd("sm_scrolls", Client_PrintScrollStats, "Prints scroll stats for given player.");
-
-	BuildPath(Path_SM, g_szLogPath, PLATFORM_MAX_PATH, "logs/AC-Scrolls.log");
 }
 
 public void OnMapStart() {

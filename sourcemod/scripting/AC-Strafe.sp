@@ -5,9 +5,9 @@
 #pragma semicolon 1
 
 #define DESC1 "Too many perfect strafe"
-#define DESC2 "Average strafe too close to 0"
+#define DESC2 "Tick diff too low"
 #define DESC3 "Perfect Turn Rate"
-//#define DESC4 ""
+#define DESC4 "Avg strafe too low"
 
 #define SAMPLE_SIZE 45
 
@@ -36,7 +36,7 @@ ArrayList g_aStrafeHistory[MAXPLAYERS+1];
 public Plugin myinfo = {
 	name = "AC Strafe module",
 	author = "hiiamu",
-	description = "strafe mwoduel for AC",
+	description = "strafe moduel for AC",
 	version = "0.1.0",
 	url = "/id/hiiamu"
 }
@@ -276,21 +276,49 @@ int Abs(int num) {
 void AnalyzeStats(int client) {
 	int iTickDifference = 0;
 	int iZeroes = 0;
+	int iStrafeCount = 0;
+	int iBadTicks = 0;
+	float fAvgTick = 0.0;
 
 	for(int i = (g_iCurrentStrafe[client] - SAMPLE_SIZE); i < g_iCurrentStrafe[client] - 1; i++) {
 		int iTick = Abs(g_aStrafeHistory[client].Get(i));
+
+		// all nums add up to under X
 		iTickDifference += iTick;
+
+		// average tick diff over sample size
+		iStrafeCount++;
+		iBadTicks = (iBadTicks + iTick);
 
 		if(iTick == 0)
 			iZeroes++;
 	}
 
+	fAvgTick = (float(iBadTicks) / float(iStrafeCount));
+
 	char[] szStrafeStats = new char[256];
 	FormatStrafes(client, szStrafeStats, 256);
-
 	char szInfo[256];
-	Format(szInfo, 256, "Tick Difference: %i", iTickDifference);
+	Format(szInfo, 256, "Avg Tick: %.2f", fAvgTick);
+	StrCat(szStrafeStats, 256, szInfo);
 
+	if(fAvgTick < 1.0) {
+		AC_Trigger(client, T_DEF, DESC4);
+		AC_NotifyDiscord(client, T_DEF, DESC4, szStrafeStats);
+		g_iBashTriggerCountdown[client] = 35;
+	}
+	else if(fAvgTick < 1.5) {
+		AC_Trigger(client, T_HIGH, DESC4);
+		AC_NotifyDiscord(client, T_HIGH, DESC4, szStrafeStats);
+		g_iBashTriggerCountdown[client] = 35;
+	}
+	else if(fAvgTick < 2.0) {
+		AC_Trigger(client, T_MED, DESC4);
+		AC_NotifyDiscord(client, T_MED, DESC4, szStrafeStats);
+		g_iBashTriggerCountdown[client] = 35;
+	}
+
+	Format(szInfo, 256, "Tick Difference: %i", iTickDifference);
 	StrCat(szStrafeStats, 256, szInfo);
 
 	if(iTickDifference < 3) {

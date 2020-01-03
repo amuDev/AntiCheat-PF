@@ -14,7 +14,7 @@ bool g_bTesting[MAXPLAYERS+1]
 
 public Plugin myinfo = {
 	name = "AntiCheat for movement servers",
-	author = "hiiamu, zwolof, powerind",
+	author = "hiiamu, powerind",
 	description = "Main module for cheat detections",
 	version = "0.1.0",
 	url = "/id/hiiamu/, /id/powerind/"
